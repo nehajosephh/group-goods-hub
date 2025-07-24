@@ -6,13 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Package, User, Building } from "lucide-react";
 
-interface AuthPageProps {
-  onLogin: (role: 'buyer' | 'vendor', name: string) => void;
-}
-
-const AuthPage = ({ onLogin }: AuthPageProps) => {
+const AuthPage = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [selectedRole, setSelectedRole] = useState<'buyer' | 'vendor'>('buyer');
+  const [selectedRole, setSelectedRole] = useState('buyer');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -21,7 +17,7 @@ const AuthPage = ({ onLogin }: AuthPageProps) => {
     location: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     // Mock authentication - in real app, this would call Firebase Auth
     onLogin(selectedRole, formData.businessName || 'Demo User');

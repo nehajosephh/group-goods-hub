@@ -5,12 +5,9 @@ import BuyerDashboard from "@/components/dashboard/BuyerDashboard";
 import VendorDashboard from "@/components/dashboard/VendorDashboard";
 
 const Index = () => {
-  const [user, setUser] = useState<{
-    role: 'buyer' | 'vendor';
-    name: string;
-  } | null>(null);
+  const [user, setUser] = useState(null);
 
-  const handleLogin = (role: 'buyer' | 'vendor', name: string) => {
+  const handleLogin = (role, name) => {
     setUser({ role, name });
   };
 

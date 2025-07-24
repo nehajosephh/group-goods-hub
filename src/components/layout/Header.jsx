@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, User, LogOut, Package } from "lucide-react";
 
-interface HeaderProps {
-  userRole?: 'buyer' | 'vendor';
-  userName?: string;
-  onLogout?: () => void;
-}
-
-const Header = ({ userRole, userName, onLogout }: HeaderProps) => {
+const Header = ({ userRole, userName, onLogout }) => {
   return (
     <header className="bg-primary text-primary-foreground shadow-lg">
       <div className="container mx-auto px-6 py-4">
