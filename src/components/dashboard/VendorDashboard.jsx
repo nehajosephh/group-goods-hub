@@ -1,9 +1,20 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { getProducts, getCarts } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 import { Package, ShoppingCart, TrendingUp, Users, Plus, Eye, Edit, Star } from "lucide-react";
 
 const VendorDashboard = () => {
+  const [products, setProducts] = useState([]);
+  const [cartRequests, setCartRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const mockProducts = [
     {
       id: 1,
@@ -48,6 +59,39 @@ const VendorDashboard = () => {
     }
   ];
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [productsResult, cartsResult] = await Promise.all([
+        getProducts(),
+        getCarts()
+      ]);
+
+      // Use real data if available, fallback to mock data
+      setProducts(productsResult.data?.length ? productsResult.data : mockProducts);
+      setCartRequests(cartsResult.data?.length ? cartsResult.data : mockCartRequests);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Use mock data on error
+      setProducts(mockProducts);
+      setCartRequests(mockCartRequests);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddProduct = () => {
+    navigate('/product/create');
+  };
+
+  const handleViewAnalytics = () => {
+    navigate('/analytics');
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -61,11 +105,21 @@ const VendorDashboard = () => {
               Manage your product catalog and track buyer requests
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90">
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90"
+                onClick={handleAddProduct}
+              >
                 <Plus className="mr-2 h-5 w-5" />
                 Add New Product
               </Button>
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white hover:text-primary">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white/30 text-white hover:bg-white hover:text-primary"
+                onClick={handleViewAnalytics}
+              >
                 View Analytics
               </Button>
             </div>

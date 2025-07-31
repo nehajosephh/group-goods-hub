@@ -1,9 +1,20 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { getCarts, getVendors } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Package, Users, TrendingUp, Plus, MapPin } from "lucide-react";
 
 const BuyerDashboard = () => {
+  const [carts, setCarts] = useState([]);
+  const [vendors, setVendors] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const mockCarts = [
     {
       id: 1,
@@ -46,6 +57,47 @@ const BuyerDashboard = () => {
     }
   ];
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [cartsResult, vendorsResult] = await Promise.all([
+        getCarts(),
+        getVendors()
+      ]);
+
+      // Use real data if available, fallback to mock data
+      setCarts(cartsResult.data?.length ? cartsResult.data : mockCarts);
+      setVendors(vendorsResult.data?.length ? vendorsResult.data : mockVendors);
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Use mock data on error
+      setCarts(mockCarts);
+      setVendors(mockVendors);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateCart = () => {
+    navigate('/cart/create');
+  };
+
+  const handleBrowseCatalogs = () => {
+    navigate('/catalog');
+  };
+
+  const handleViewCartDetails = (cartId) => {
+    navigate(`/cart/${cartId}`);
+  };
+
+  const handleBrowseVendor = (vendorId) => {
+    navigate(`/vendor/${vendorId}`);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
@@ -59,11 +111,21 @@ const BuyerDashboard = () => {
               Join shared carts, collaborate with local businesses, and save on bulk orders
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button variant="secondary" size="lg" className="bg-white text-primary hover:bg-white/90">
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="bg-white text-primary hover:bg-white/90"
+                onClick={handleCreateCart}
+              >
                 <Plus className="mr-2 h-5 w-5" />
                 Create New Cart
               </Button>
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white hover:text-primary">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="border-white/30 text-white hover:bg-white hover:text-primary"
+                onClick={handleBrowseCatalogs}
+              >
                 Browse Catalogs
               </Button>
             </div>
@@ -134,7 +196,13 @@ const BuyerDashboard = () => {
             </div>
             
             <div className="space-y-4">
-              {mockCarts.map((cart) => (
+              {loading ? (
+                <div className="text-center py-8">
+                  <LoadingSpinner className="w-6 h-6 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading carts...</p>
+                </div>
+              ) : (
+                carts.map((cart) => (
                 <Card key={cart.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -174,10 +242,18 @@ const BuyerDashboard = () => {
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleViewCartDetails(cart.id)}
+                        >
                           View Details
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleViewCartDetails(cart.id)}
+                        >
                           Add Items
                         </Button>
                       </div>
@@ -198,7 +274,13 @@ const BuyerDashboard = () => {
             </div>
             
             <div className="space-y-4">
-              {mockVendors.map((vendor) => (
+              {loading ? (
+                <div className="text-center py-8">
+                  <LoadingSpinner className="w-6 h-6 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading vendors...</p>
+                </div>
+              ) : (
+                vendors.map((vendor) => (
                 <Card key={vendor.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -222,10 +304,18 @@ const BuyerDashboard = () => {
                       </div>
                       
                       <div className="flex gap-2">
-                        <Button size="sm" className="flex-1">
+                        <Button 
+                          size="sm" 
+                          className="flex-1"
+                          onClick={() => handleBrowseVendor(vendor.id)}
+                        >
                           Browse Catalog
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={handleCreateCart}
+                        >
                           Start Cart
                         </Button>
                       </div>

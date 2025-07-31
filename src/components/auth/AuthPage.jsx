@@ -4,11 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { signUp, signIn } from "@/lib/supabase";
+import { useToast } from "@/hooks/use-toast";
 import { ShoppingCart, Package, User, Building } from "lucide-react";
 
 const AuthPage = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [selectedRole, setSelectedRole] = useState('buyer');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -17,10 +22,43 @@ const AuthPage = ({ onLogin }) => {
     location: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock authentication - in real app, this would call Firebase Auth
-    onLogin(selectedRole, formData.businessName || 'Demo User');
+    setLoading(true);
+
+    try {
+      if (isLogin) {
+        const { data, error } = await signIn(formData.email, formData.password);
+        if (error) throw error;
+        
+        const userRole = data.user?.user_metadata?.role || 'buyer';
+        const userName = data.user?.user_metadata?.business_name || data.user?.email;
+        onLogin(userRole, userName);
+      } else {
+        const userData = {
+          role: selectedRole,
+          business_name: formData.businessName,
+          business_type: formData.businessType,
+          location: formData.location
+        };
+
+        const { data, error } = await signUp(formData.email, formData.password, userData);
+        if (error) throw error;
+
+        toast({
+          title: "Account created successfully!",
+          description: "Please check your email to verify your account."
+        });
+      }
+    } catch (error) {
+      toast({
+        title: isLogin ? "Login failed" : "Sign up failed",
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -196,8 +234,15 @@ const AuthPage = ({ onLogin }) => {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg">
-                    {isLogin ? 'Sign In' : 'Create Account'}
+                  <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                    {loading ? (
+                      <>
+                        <LoadingSpinner className="w-4 h-4 mr-2" />
+                        {isLogin ? 'Signing In...' : 'Creating Account...'}
+                      </>
+                    ) : (
+                      isLogin ? 'Sign In' : 'Create Account'
+                    )}
                   </Button>
                 </form>
 
