@@ -203,64 +203,65 @@ const BuyerDashboard = () => {
                 </div>
               ) : (
                 carts.map((cart) => (
-                <Card key={cart.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{cart.title}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {cart.location}
-                        </CardDescription>
+                  <Card key={cart.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{cart.title}</CardTitle>
+                          <CardDescription className="flex items-center mt-1">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {cart.location}
+                          </CardDescription>
+                        </div>
+                        <Badge 
+                          variant={cart.status === 'open' ? 'default' : 'secondary'}
+                          className={cart.status === 'threshold_met' ? 'bg-success text-success-foreground' : ''}
+                        >
+                          {cart.status === 'open' ? 'Open' : 'Ready to Order'}
+                        </Badge>
                       </div>
-                      <Badge 
-                        variant={cart.status === 'open' ? 'default' : 'secondary'}
-                        className={cart.status === 'threshold_met' ? 'bg-success text-success-foreground' : ''}
-                      >
-                        {cart.status === 'open' ? 'Open' : 'Ready to Order'}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span>Vendor: {cart.vendor}</span>
-                        <span>{cart.participants} participants</span>
-                      </div>
-                      
-                      <div className="space-y-1">
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
                         <div className="flex justify-between text-sm">
-                          <span>Progress: ₹{cart.currentValue.toLocaleString()} / ₹{cart.minValue.toLocaleString()}</span>
-                          <span>{Math.round((cart.currentValue / cart.minValue) * 100)}%</span>
+                          <span>Vendor: {cart.vendor}</span>
+                          <span>{cart.participants} participants</span>
                         </div>
-                        <div className="w-full bg-muted rounded-full h-2">
-                          <div 
-                            className="bg-primary h-2 rounded-full transition-all"
-                            style={{ width: `${Math.min((cart.currentValue / cart.minValue) * 100, 100)}%` }}
-                          />
+                        
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span>Progress: ₹{cart.currentValue.toLocaleString()} / ₹{cart.minValue.toLocaleString()}</span>
+                            <span>{Math.round((cart.currentValue / cart.minValue) * 100)}%</span>
+                          </div>
+                          <div className="w-full bg-muted rounded-full h-2">
+                            <div 
+                              className="bg-primary h-2 rounded-full transition-all"
+                              style={{ width: `${Math.min((cart.currentValue / cart.minValue) * 100, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleViewCartDetails(cart.id)}
+                          >
+                            View Details
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleViewCartDetails(cart.id)}
+                          >
+                            Add Items
+                          </Button>
                         </div>
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => handleViewCartDetails(cart.id)}
-                        >
-                          View Details
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleViewCartDetails(cart.id)}
-                        >
-                          Add Items
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
 
