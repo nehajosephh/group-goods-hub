@@ -282,48 +282,49 @@ const BuyerDashboard = () => {
                 </div>
               ) : (
                 vendors.map((vendor) => (
-                <Card key={vendor.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{vendor.name}</CardTitle>
-                        <CardDescription className="flex items-center mt-1">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          {vendor.location}
-                        </CardDescription>
+                  <Card key={vendor.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{vendor.name}</CardTitle>
+                          <CardDescription className="flex items-center mt-1">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            {vendor.location}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="secondary">
+                          {vendor.category}
+                        </Badge>
                       </div>
-                      <Badge variant="secondary">
-                        {vendor.category}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-sm">
-                        <span>{vendor.products} products</span>
-                        <span>⭐ {vendor.rating}</span>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span>{vendor.products} products</span>
+                          <span>⭐ {vendor.rating}</span>
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            className="flex-1"
+                            onClick={() => handleBrowseVendor(vendor.id)}
+                          >
+                            Browse Catalog
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={handleCreateCart}
+                          >
+                            Start Cart
+                          </Button>
+                        </div>
                       </div>
-                      
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          className="flex-1"
-                          onClick={() => handleBrowseVendor(vendor.id)}
-                        >
-                          Browse Catalog
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={handleCreateCart}
-                        >
-                          Start Cart
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </div>
