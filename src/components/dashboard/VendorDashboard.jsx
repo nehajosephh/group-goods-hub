@@ -190,7 +190,13 @@ const VendorDashboard = () => {
             </div>
             
             <div className="space-y-4">
-              {mockProducts.map((product) => (
+              {loading ? (
+                <div className="text-center py-8">
+                  <LoadingSpinner className="w-6 h-6 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading products...</p>
+                </div>
+              ) : (
+                products.map((product) => (
                 <Card key={product.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -228,7 +234,8 @@ const VendorDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
           </div>
 
@@ -242,7 +249,13 @@ const VendorDashboard = () => {
             </div>
             
             <div className="space-y-4">
-              {mockCartRequests.map((request) => (
+              {loading ? (
+                <div className="text-center py-8">
+                  <LoadingSpinner className="w-6 h-6 mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Loading requests...</p>
+                </div>
+              ) : (
+                cartRequests.map((request) => (
                 <Card key={request.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
                     <div className="flex items-start justify-between">
@@ -283,7 +296,8 @@ const VendorDashboard = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+                ))
+              )}
             </div>
           </div>
         </div>
