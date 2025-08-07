@@ -14,13 +14,279 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cart_items: {
+        Row: {
+          cart_id: string | null
+          created_at: string
+          id: string
+          product_id: string | null
+          quantity: number
+          total_price: number | null
+          unit_price: number
+          user_id: string | null
+        }
+        Insert: {
+          cart_id?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          total_price?: number | null
+          unit_price: number
+          user_id?: string | null
+        }
+        Update: {
+          cart_id?: string | null
+          created_at?: string
+          id?: string
+          product_id?: string | null
+          quantity?: number
+          total_price?: number | null
+          unit_price?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_items_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "carts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cart_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cart_participants: {
+        Row: {
+          cart_id: string | null
+          id: string
+          joined_at: string
+          user_id: string | null
+        }
+        Insert: {
+          cart_id?: string | null
+          id?: string
+          joined_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          cart_id?: string | null
+          id?: string
+          joined_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cart_participants_cart_id_fkey"
+            columns: ["cart_id"]
+            isOneToOne: false
+            referencedRelation: "carts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      carts: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          current_value: number | null
+          description: string | null
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          min_value: number | null
+          status: string | null
+          title: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          min_value?: number | null
+          status?: string | null
+          title: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          min_value?: number | null
+          status?: string | null
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "carts_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          in_stock: boolean | null
+          min_order: number | null
+          name: string
+          price: number
+          unit: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          min_order?: number | null
+          name: string
+          price: number
+          unit?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          in_stock?: boolean | null
+          min_order?: number | null
+          name?: string
+          price?: number
+          unit?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          business_name: string | null
+          business_type: string | null
+          created_at: string
+          id: string
+          latitude: number | null
+          location: string | null
+          longitude: number | null
+          role: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          business_name?: string | null
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          business_name?: string | null
+          business_type?: string | null
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string | null
+          longitude?: number | null
+          role?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          name: string
+          products_count: number | null
+          rating: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location: string
+          longitude?: number | null
+          name: string
+          products_count?: number | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          latitude?: number | null
+          location?: string
+          longitude?: number | null
+          name?: string
+          products_count?: number | null
+          rating?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_distance: {
+        Args: { lat1: number; lon1: number; lat2: number; lon2: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
