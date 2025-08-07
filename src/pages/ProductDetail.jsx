@@ -1,48 +1,113 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { ArrowLeft, ShoppingCart, Package } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { LoadingSpinner } from '@/components/ui/loading-spinner'
+import { supabase } from '@/integrations/supabase/client'
+import { useToast } from '@/hooks/use-toast'
+import { ArrowLeft, ShoppingCart, Package, MapPin, Star } from 'lucide-react'
+import Header from '@/components/layout/Header'
+import { useAuth } from '@/contexts/AuthContext'
 
 const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const [product, setProduct] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [userLocation, setUserLocation] = useState(null)
+  const { user, userRole, signOut } = useAuth()
+  const { toast } = useToast()
 
   useEffect(() => {
-    // Mock product data - in real app would fetch from Supabase
-    setTimeout(() => {
-      setProduct({
-        id: id,
-        name: "Premium Copy Paper A4",
-        description: "High-quality white copy paper perfect for office use. 80gsm weight with excellent printability and durability.",
-        price: 280,
-        unit: "per ream",
-        min_order: 10,
-        category: "Stationery",
-        vendor: "PaperPlus Supplies",
-        vendor_location: "Mumbai, MH",
-        in_stock: true,
-        specifications: {
-          weight: "80gsm",
-          size: "A4 (210x297mm)",
-          brightness: "CIE 150",
-          opacity: "94%"
-        }
-      })
-      setLoading(false)
-    }, 1000)
+    loadProduct()
+    getUserLocation()
   }, [id])
+
+  const getUserLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          })
+        },
+        (error) => {
+          console.log('Location access denied:', error)
+          setUserLocation({
+            latitude: 19.0760,
+            longitude: 72.8777
+          })
+        }
+      )
+    } else {
+      setUserLocation({
+        latitude: 19.0760,
+        longitude: 72.8777
+      })
+    }
+  }
+
+  const loadProduct = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(`
+          *,
+          vendors(name, location, rating, latitude, longitude)
+        `)
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      setProduct(data)
+    } catch (error) {
+      console.error('Error loading product:', error)
+      toast({
+        title: "Error loading product",
+        description: "Failed to load product details",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const calculateDistance = (vendorLat, vendorLon) => {
+    if (!userLocation || !vendorLat || !vendorLon) return 'N/A'
+    
+    const R = 6371 // Earth's radius in km
+    const dLat = (vendorLat - userLocation.latitude) * Math.PI / 180
+    const dLon = (vendorLon - userLocation.longitude) * Math.PI / 180
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(userLocation.latitude * Math.PI / 180) * Math.cos(vendorLat * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const distance = R * c
+    
+    return distance < 1 ? `${(distance * 1000).toFixed(0)}m` : `${distance.toFixed(1)}km`
+  }
+
+  const handleLogout = async () => {
+    await signOut()
+    navigate('/')
+  }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <LoadingSpinner className="w-8 h-8 mx-auto mb-4" />
-          <p>Loading product details...</p>
+      <div className="min-h-screen bg-background">
+        <Header 
+          userRole={userRole}
+          userName={user ? (user.user_metadata?.business_name || user.email) : 'Demo User'}
+          onLogout={handleLogout}
+        />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <LoadingSpinner className="w-8 h-8 mx-auto mb-4" />
+            <p>Loading product details...</p>
+          </div>
         </div>
       </div>
     )
@@ -50,12 +115,19 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
-          <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/catalog')}>Browse Catalog</Button>
+      <div className="min-h-screen bg-background">
+        <Header 
+          userRole={userRole}
+          userName={user ? (user.user_metadata?.business_name || user.email) : 'Demo User'}
+          onLogout={handleLogout}
+        />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Product Not Found</h1>
+            <p className="text-muted-foreground mb-4">The product you're looking for doesn't exist.</p>
+            <Button onClick={() => navigate('/catalog')}>Browse Catalog</Button>
+          </div>
         </div>
       </div>
     )
@@ -63,6 +135,12 @@ const ProductDetail = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Header 
+        userRole={userRole}
+        userName={user ? (user.user_metadata?.business_name || user.email) : 'Demo User'}
+        onLogout={handleLogout}
+      />
+      
       <div className="container mx-auto px-6 py-8">
         <Button
           variant="ghost"
@@ -109,24 +187,39 @@ const ProductDetail = () => {
                 </Card>
                 <Card>
                   <CardContent className="p-4 text-center">
-                    <div className="text-2xl font-bold">⭐</div>
-                    <div className="text-sm text-muted-foreground">Rated</div>
+                    <div className="text-2xl font-bold flex items-center justify-center gap-1">
+                      <Star className="h-6 w-6 fill-current text-yellow-500" />
+                      {product.vendors?.rating || 'N/A'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">Rating</div>
                   </CardContent>
                 </Card>
               </div>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Product Specifications</CardTitle>
+                  <CardTitle>Product Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    {Object.entries(product.specifications || {}).map(([key, value]) => (
-                      <div key={key} className="flex justify-between">
-                        <span className="font-medium capitalize">{key}:</span>
-                        <span>{value}</span>
-                      </div>
-                    ))}
+                  <div className="space-y-4">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Category:</span>
+                      <span>{product.category}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Unit:</span>
+                      <span>{product.unit}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Minimum Order:</span>
+                      <span>{product.min_order} {product.unit}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium">Availability:</span>
+                      <Badge variant={product.in_stock ? "success" : "destructive"}>
+                        {product.in_stock ? "In Stock" : "Out of Stock"}
+                      </Badge>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -140,8 +233,20 @@ const ProductDetail = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="font-semibold">{product.vendor}</h3>
-                  <p className="text-sm text-muted-foreground">{product.vendor_location}</p>
+                  <h3 className="font-semibold">{product.vendors?.name}</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4" />
+                    <span>{product.vendors?.location}</span>
+                    <span className="text-primary font-medium">
+                      {calculateDistance(product.vendors?.latitude, product.vendors?.longitude)}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <Star className="h-4 w-4 fill-current text-yellow-500" />
+                  <span className="font-medium">{product.vendors?.rating || 'N/A'}</span>
+                  <span className="text-sm text-muted-foreground">vendor rating</span>
                 </div>
                 
                 <div className="space-y-2">
@@ -157,7 +262,7 @@ const ProductDetail = () => {
                   <Button 
                     variant="outline" 
                     className="w-full"
-                    onClick={() => navigate(`/vendor/${product.vendor_id || 1}`)}
+                    onClick={() => navigate(`/vendor/${product.vendor_id}`)}
                   >
                     View Vendor Profile
                   </Button>
